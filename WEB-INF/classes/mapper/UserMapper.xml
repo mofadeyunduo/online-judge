@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="per.piers.onlineJudge.mapper.UserMapper">
+    <insert id="insertUser" parameterType="User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO online_judge.users (email, password, name, sex, role, enabled)
+        VALUES (#{email}, #{password}, #{name}, #{sex}, #{role}, #{enabled})
+    </insert>
+    <update id="updateUser" parameterType="User">
+        UPDATE online_judge.users
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="email != null">email = #{email},</if>
+            <if test="password != null">password = #{password},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="sex != null">sex = #{sex},</if>
+            <if test="role != null">role = #{role},</if>
+            <if test="enabled != null">enabled = #{enabled},</if>
+        </trim>
+        WHERE id = #{id}
+    </update>
+    <delete id="deleteUser" parameterType="int">
+        DELETE FROM online_judge.users
+        WHERE id = #{id}
+    </delete>
+    <select id="selectUserByEmail" parameterType="String" resultMap="userResult">
+        SELECT *
+        FROM online_judge.users
+        WHERE email = #{email}
+    </select>
+    <resultMap id="userResult" type="User">
+        <id column="id" property="id"/>
+        <result column="email" property="email"/>
+        <result column="password" property="password"/>
+        <result column="name" property="name"/>
+        <result column="sex" property="sex"/>
+        <result column="enabled" property="enabled"/>
+        <result column="role" property="role"/>
+    </resultMap>
+</mapper>
