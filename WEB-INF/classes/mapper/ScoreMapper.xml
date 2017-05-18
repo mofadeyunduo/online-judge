@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="per.piers.onlineJudge.mapper.ScoreMapper">
+    <select id="selectAllScore" parameterType="Integer" resultMap="allScoreResult">
+        SELECT
+            uid,
+            qid,
+            max(correct_rate) AS max_correct_rate
+        FROM tests
+        WHERE uid = #{uid}
+        GROUP BY uid, qid
+    </select>
+    <select id="selectSumScoreAndRank" parameterType="Integer" resultMap="sumScoreAndRankResult">
+        SELECT *
+        FROM
+            (SELECT
+                 uid,
+                 sum_correct_rate,
+                 (@rowNum := @rowNum + 1) AS rank
+             FROM (SELECT
+                       uid,
+                       sum(max_corrcet_rate) AS sum_correct_rate
+                   FROM
+                       (SELECT
+                            uid,
+                            qid,
+                            max(correct_rate) AS max_corrcet_rate
+                        FROM tests
+                        GROUP BY uid, qid) AS max_tests
+                   GROUP BY uid
+                   ORDER BY sum_correct_rate DESC) AS rank_tests, (SELECT (@rowNum := 0)) AS rank) AS all_tests
+        WHERE uid = #{uid}
+    </select>
+    <resultMap id="allScoreResult" type="TestInfo">
+        <id column="uid" property="uid"/>
+        <id column="qid" property="qid"/>
+        <id column="submit_time" property="submitTime"/>
+        <result column="description" property="description"/>
+        <result column="max_correct_rate" property="correctRate"/>
+    </resultMap>
+    <resultMap id="sumScoreAndRankResult" type="Score">
+        <id column="uid" property="uid"/>
+        <result column="sum_correct_rate" property="sumCorrectRate"/>
+        <result column="rank" property="rank"/>
+    </resultMap>
+</mapper>
