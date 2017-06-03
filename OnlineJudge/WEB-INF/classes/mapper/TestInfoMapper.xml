@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="per.piers.onlineJudge.mapper.TestInfoMapper">
+    <insert id="insertTestInfo" parameterType="TestInfo" useGeneratedKeys="true" keyProperty="testInfo.id">
+        INSERT INTO tests (uid, qid, submit_time, code, correct_rate)
+        VALUES (#{testInfo.uid}, #{testInfo.qid}, #{testInfo.submitTime}, #{testInfo.code}, #{testInfo.correctRate})
+    </insert>
+    <update id="updateTestInfo" parameterType="TestInfo">
+        UPDATE categories
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null">name = #{name},</if>
+            <if test="description != null">description = #{name},</if>
+        </trim>
+        WHERE id = #{id}
+    </update>
+    <delete id="deleteTestInfo" parameterType="TestInfo">
+        DELETE FROM tests
+        WHERE tests.qid = #{testInfo.qid} AND tests.uid = #{testInfo.uid} AND tests.submit_time = #{testInfo.submitTime}
+    </delete>
+    <select id="selectTestInfo" parameterType="TestInfo" resultMap="testInfoResult">
+        SELECT *
+        FROM tests
+        <if test="testInfo != null">
+            <where>
+                <if test="testInfo.qid != null">tests.qid = #{testInfo.qid}</if>
+            </where>
+        </if>
+    </select>
+    <resultMap id="testInfoResult" type="TestInfo">
+        <id column="qid" property="qid"/>
+        <id column="cid" property="cid"/>
+        <id column="submit_time" property="submitTime"/>
+        <result column="code" property="code"/>
+        <result column="correct_rate" property="correctRate"/>
+    </resultMap>
+</mapper>

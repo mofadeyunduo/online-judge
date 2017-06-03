@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="per.piers.onlineJudge.mapper.QuestionMapper">
+    <insert id="insertQuestion" parameterType="Question" useGeneratedKeys="true">
+        INSERT INTO questions (qid, name, description, cid)
+        VALUES (#{question.qid}, #{question.name}, #{question.description}, #{question.category.id})
+    </insert>
+    <update id="updateQuestion" parameterType="Question">
+        UPDATE questions
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="question.qid != null">qid = #{question.qid},</if>
+            <if test="question.name != null">name = #{question.name},</if>
+            <if test="question.description != null">description = #{question.description},</if>
+            <if test="question.category != null">cid = #{question.category.id},</if>
+        </trim>
+        WHERE id = #{question.id}
+    </update>
+    <delete id="deleteQuestion" parameterType="Question">
+        DELETE FROM questions
+        WHERE id = #{question.id}
+    </delete>
+    <select id="selectQuestion" parameterType="Question" resultMap="questionResult">
+        SELECT q.id, q.qid, q.description, q.name, c.id as cid, c.name as cname, c.description as cdescription
+        FROM questions AS q LEFT JOIN categories AS c ON q.cid = c.id
+        <if test="question != null">
+            <where>
+                <if test="question.id != null">q.id = #{question.id}</if>
+                <if test="question.qid != null">q.qid = #{question.qid}</if>
+                <if test="question.category != null and question.category.id != null">q.cid =
+                    #{question.category.id}
+                </if>
+            </where>
+        </if>
+    </select>
+    <resultMap id="questionResult" type="Question">
+        <id column="id" property="id"/>
+        <result column="qid" property="qid"/>
+        <result column="name" property="name"/>
+        <result column="description" property="description"/>
+        <association property="category" resultMap="categoryResult"/>
+    </resultMap>
+    <resultMap id="categoryResult" type="Category">
+        <id column="cid" property="id"/>
+        <result column="cname" property="name"/>
+        <result column="cdescription" property="description"/>
+    </resultMap>
+</mapper>

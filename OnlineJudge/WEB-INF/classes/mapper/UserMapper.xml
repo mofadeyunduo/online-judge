@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="per.piers.onlineJudge.mapper.UserMapper">
+    <insert id="insertUser" parameterType="User" useGeneratedKeys="true" keyProperty="user.id">
+        INSERT INTO users (email, password, name, sex, role, enabled)
+        VALUES (#{user.email}, #{user.password}, #{user.name}, #{user.sex}, #{user.role}, #{user.enabled})
+    </insert>
+    <update id="updateUser" parameterType="User">
+        UPDATE users
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="user.email != null">email = #{user.email},</if>
+            <if test="user.password != null">password = #{user.password},</if>
+            <if test="user.name != null">name = #{user.name},</if>
+            <if test="user.sex != null">sex = #{user.sex},</if>
+            <if test="user.role != null">role = #{user.role},</if>
+            <if test="user.enabled != null">enabled = #{user.enabled},</if>
+        </trim>
+        WHERE id = #{user.id}
+    </update>
+    <delete id="deleteUser" parameterType="User">
+        DELETE FROM users
+        WHERE id = #{user.id}
+    </delete>
+    <select id="selectUser" parameterType="User" resultMap="userResult">
+        SELECT *
+        FROM users
+        <if test="user != null">
+            <where>
+                <if test="user.email != null">email = #{user.email}</if>
+            </where>
+        </if>
+    </select>
+    <resultMap id="userResult" type="User">
+        <id column="id" property="id"/>
+        <result column="email" property="email"/>
+        <result column="password" property="password"/>
+        <result column="name" property="name"/>
+        <result column="sex" property="sex"/>
+        <result column="enabled" property="enabled"/>
+        <result column="role" property="role"/>
+    </resultMap>
+</mapper>
