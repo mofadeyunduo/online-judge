@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="per.piers.onlineJudge.mapper.ScoreMapper">
+    <select id="selectAllScore" parameterType="Integer" resultMap="allScoreResult">
+        SELECT
+            uid,
+            qid,
+            max(correct_rate) AS max_correct_rate
+        FROM tests
+        WHERE uid = #{uid}
+        GROUP BY uid, qid
+    </select>
+    <select id="selectSumScoreAndRank" parameterType="Integer" resultMap="sumScoreAndRankResult">
+        SELECT *
+        FROM
+            (SELECT
+                 uid,
+                 sum_correct_rate,
+                 (@rowNum := @rowNum + 1) AS rank
+             FROM (SELECT
+                       uid,
+                       sum(max_corrcet_rate) AS sum_correct_rate
+                   FROM
+                       (SELECT
+                            uid,
+                            qid,
+                            max(correct_rate) AS max_corrcet_rate
+                        FROM tests
+                        GROUP BY uid, qid) AS max_tests
+                   GROUP BY uid
+                   ORDER BY sum_correct_rate DESC) AS rank_tests, (SELECT (@rowNum := 0)) AS rank) AS all_tests
+        WHERE uid = #{uid}
+    </select>
+    <select id="selectPracticeAndUsualScoreFromAdmin" resultMap="practiceAndUsualScoreResult">
+        SELECT
+            scores.id,
+            scores.uid,
+            users.email,
+            users.name                       AS userName,
+            sum_tests.avg_correct_rate * 100 AS practice_score,
+            scores.usual_score
+        FROM
+            (SELECT
+                 uid,
+                 avg(max_corrcet_rate) AS avg_correct_rate
+             FROM
+                 (SELECT
+                      uid,
+                      qid,
+                      max(correct_rate) AS max_corrcet_rate
+                  FROM (SELECT
+                            uid,
+                            qid,
+                            correct_rate
+                        FROM tests
+                        WHERE
+                            uid IN (SELECT uid_user
+                                    FROM advisors
+                                    WHERE uid_admin = #{uidAdmin}) AND qid IN (SELECT questions.id
+                                                                               FROM categories
+                                                                                   LEFT JOIN questions
+                                                                                       ON categories.id = questions.cid
+                                                                               WHERE cid = #{cid})
+                       ) AS filter_tests
+                  GROUP BY uid, qid) AS max_tests
+             GROUP BY uid) AS sum_tests LEFT JOIN scores ON sum_tests.uid = scores.uid AND scores.cid = #{cid} LEFT JOIN users ON sum_tests.uid = users.id
+    </select>
+    <select id="selectUsualScore" parameterType="AllScore" resultMap="practiceAndUsualScoreResult">
+        SELECT
+            scores.id,
+            categories.name,
+            users.name,
+            users.email,
+            usual_score
+        FROM scores
+            LEFT JOIN users ON scores.uid = users.id
+            LEFT JOIN categories ON scores.cid = categories.id
+        WHERE scores.id = #{allScore.id}
+    </select>
+    <update id="updateUsualScore" parameterType="AllScore">
+        UPDATE scores
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="allScore.usualScore != null">usual_score = #{allScore.usualScore},</if>
+        </trim>
+        WHERE id = #{allScore.id}
+    </update>
+    <resultMap id="allScoreResult" type="TestInfo">
+        <id column="uid" property="uid"/>
+        <id column="qid" property="qid"/>
+        <id column="submit_time" property="submitTime"/>
+        <result column="description" property="description"/>
+        <result column="max_correct_rate" property="correctRate"/>
+    </resultMap>
+    <resultMap id="sumScoreAndRankResult" type="Score">
+        <id column="uid" property="uid"/>
+        <result column="sum_correct_rate" property="sumCorrectRate"/>
+        <result column="rank" property="rank"/>
+    </resultMap>
+    <resultMap id="practiceAndUsualScoreResult" type="AllScore">
+        <id column="id" property="id"/>
+        <result column="practice_score" property="practiceScore"/>
+        <result column="usual_score" property="usualScore"/>
+        <association property="user" resultMap="userResult"/>
+        <association property="category" resultMap="categoryResult"/>
+    </resultMap>
+    <resultMap id="userResult" type="User">
+        <result column="email" property="email"/>
+        <result column="userName" property="name"/>
+    </resultMap>
+    <resultMap id="categoryResult" type="Category">
+        <result column="categoryName" property="name"/>
+    </resultMap>
+</mapper>

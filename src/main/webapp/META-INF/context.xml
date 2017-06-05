@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context>
+    <Resource name="mybatis"
+              auth="Container"
+              type="javax.sql.DataSource"
+              driverClassName="com.mysql.cj.jdbc.Driver"
+              url="jdbc:mysql://localhost:3306/online_judge?serverTimezone=UTC&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=true"
+              username="root"
+              password="woaimysql-135"
+              maxTotal="20"
+              maxIdle="10"
+              maxWaitMillis="10000"/>
+</Context>

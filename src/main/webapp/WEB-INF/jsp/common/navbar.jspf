@@ -1,0 +1,38 @@
+<%@page pageEncoding="UTF-8" %>
+<div class="navbar navbar-default">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="${pageContext.request.contextPath}/">Piers 在线评测</a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="${pageContext.request.contextPath}/test/categories">题库</a></li>
+                <li><a href="${pageContext.request.contextPath}/score/user">分数查询</a></li>
+                <security:authorize access="hasAuthority('admin')">
+                    <li><a href="${pageContext.request.contextPath}/testManager/categories">题库管理</a></li>
+                    <li><a href="${pageContext.request.contextPath}/testManager/questions">题目管理</a></li>
+                    <li><a href="${pageContext.request.contextPath}/testManager/questionsAnalysis">题目分析</a></li>
+                    <li><a href="${pageContext.request.contextPath}/testManager/scores">成绩管理</a></li>
+                    <li><a href="${pageContext.request.contextPath}/testManager/import/user">用户导入</a></li>
+                </security:authorize>
+            </ul>
+            <div class="navbar-form navbar-right">
+                <c:choose>
+                    <c:when test="${pageContext.request.userPrincipal.name == null}">
+                        <a class="btn btn-default" href="${pageContext.request.contextPath}/user/login">登录</a>
+                        <a class="btn btn-default" href="${pageContext.request.contextPath}/user/register">注册</a>
+                    </c:when>
+                    <c:otherwise>
+                        <security:authentication var="email" property="principal.username"/>
+                        <a class="btn btn-default"
+                           href="${pageContext.request.contextPath}/user/information">${email}</a>
+                    </c:otherwise>
+                </c:choose>
+            </div>
+        </div>
+        <!--/.navbar-collapse -->
+    </div>
+</div>

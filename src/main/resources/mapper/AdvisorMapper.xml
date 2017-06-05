@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="per.piers.onlineJudge.mapper.AdvisorMapper">
+    <select id="selectAdvisor" parameterType="Advisor" resultMap="advisorResult">
+        SELECT *
+        FROM advisors
+        <if test="advisor != null">
+            <trim prefix="WHERE" suffixOverrides="AND ">
+                <if test="advisor.uidUser != null">uid_user = #{advisor.uidUser} AND </if>
+                <if test="advisor.uidAdmin != null">uid_admin = #{advisor.uidAdmin} AND </if>
+            </trim>
+        </if>
+    </select>
+    <insert id="insertAdvisor" parameterType="Advisor" useGeneratedKeys="true">
+        INSERT INTO advisors (uid_user, uid_admin)
+        VALUES (#{advisor.uidUser}, #{advisor.uidAdmin})
+    </insert>
+    <delete id="deleteAdvisor" parameterType="Advisor">
+        DELETE FROM advisors
+        WHERE id = #{advisor.id}
+    </delete>
+    <resultMap id="advisorResult" type="Advisor">
+        <id property="id" column="id" />
+        <result property="uidUser" column="uid_user"/>
+        <result property="uidAdmin" column="uid_admin"/>
+    </resultMap>
+</mapper>
